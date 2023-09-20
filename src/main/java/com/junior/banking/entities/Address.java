@@ -1,0 +1,34 @@
+package com.junior.banking.entities;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
+@Data
+@SuperBuilder
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+public class Address extends AbstractEntity{
+	
+	private String street;
+	
+	private Integer houseNumber;
+	
+	private Integer ZipCode;
+	
+	private String city;
+	
+	private String country;
+	
+	@OneToOne
+	@JoinColumn(name = "user_id")
+	private User user;
+}
