@@ -117,14 +117,15 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	public AuthenticationResponse authenticate(AuthenticationRequest request) {
-		authManger.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+		authManger.authenticate(
+				new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+		);
 		var user = repository.findByEmail(request.getEmail())
 				.orElseThrow();
 		var jwtToken = jwtUtils.generateToken(user);
 		return AuthenticationResponse.builder()
 				.token(jwtToken)
 				.build();
-
 	}
 
 	private Role findOrCreateRole(String roleName) {

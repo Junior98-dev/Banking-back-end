@@ -3,6 +3,8 @@ package com.junior.banking.handlers;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -49,6 +51,22 @@ public class GlobalExceptionHandler {
 				.errorMessage("Il existe déja un utilisateur avec cet email")
 				.build();
 		return  ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.body(representation);
+	}
+	@ExceptionHandler(DisabledException.class)
+	public ResponseEntity<ExceptionRepresentation> handleDisabledException(){
+		ExceptionRepresentation representation = ExceptionRepresentation.builder()
+				.errorMessage("Vous ne pouvez pas accéder à votre compte, car il n'est pas encore activé")
+				.build();
+		return  ResponseEntity.status(HttpStatus.FORBIDDEN)
+				.body(representation);
+	}
+	@ExceptionHandler(BadCredentialsException.class)
+	public ResponseEntity<ExceptionRepresentation> handleBadCredentialException(){
+		ExceptionRepresentation representation = ExceptionRepresentation.builder()
+				.errorMessage("Email ou mot de passe incorrect")
+				.build();
+		return  ResponseEntity.status(HttpStatus.FORBIDDEN)
 				.body(representation);
 	}
 	

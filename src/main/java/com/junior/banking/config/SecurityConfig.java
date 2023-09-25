@@ -17,6 +17,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws  Exception{
 
@@ -24,7 +25,24 @@ public class SecurityConfig {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                        .requestMatchers("/auth/register", "/auth/authenticate")
+                        .requestMatchers(
+                                "/auth/register",
+                                "/auth/authenticate",
+                                "/api/access/**",
+                                "/h2-console/**",
+                                // resources for swagger to work properly
+                                "/v2/api-docs",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/swagger-resources",
+                                "/swagger-resources/**",
+                                "/configuration/ui",
+                                "/configuration/security",
+                                "/swagger-ui/**",
+                                "/webjars/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/index.html"
+                        )
                         .permitAll()
                         .anyRequest()
                         .authenticated()
