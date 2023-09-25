@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.junior.banking.entities.Role;
 
-public interface Rolerepository extends JpaRepository<Role, Integer>{
+public interface RoleRepository extends JpaRepository<Role, Integer>{
 
 	Optional<Role> findByName(String roleName);
 	

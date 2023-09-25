@@ -4,6 +4,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
+import com.junior.banking.config.JwtUtils;
+import com.junior.banking.dto.AuthenticationRequest;
+import com.junior.banking.dto.AuthenticationResponse;
+import com.junior.banking.entities.Role;
+import com.junior.banking.repositories.RoleRepository;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,21 +30,30 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
 
+	private static final String ROLE_USER = "ROLE_USER";
+
 	private final UserRepository repository;
 	private final AccountService accountService;
 	private final ObjectsValidator<UserDto> validator;
+	private final PasswordEncoder passwordEncoder;
+	private final JwtUtils jwtUtils;
+	private final AuthenticationManager authManger;
+	private final RoleRepository  roleRepository;
+
 
 	
 	@Override
 	public Integer save(UserDto dto) {
 		validator.validate(dto);
 		User user = UserDto.toEntity(dto);
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		return repository.save(user).getId();
 		
 		
 	}
 
 	@Override
+	@Transactional
 	public List<UserDto> findAll() {
 		return repository.findAll()
 				.stream()
@@ -84,6 +101,44 @@ public class UserServiceImpl implements UserService{
 		return user.getId();
 	}
 
+	@Override
+	@Transactional
+	public AuthenticationResponse register(UserDto dto) {
+		validator.validate(dto);
+		User user = UserDto.toEntity(dto);
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		user.setRole(findOrCreateRole(ROLE_USER));
+		repository.save(user);
+		var jwtToken = jwtUtils.generateToken(user);
+		return AuthenticationResponse.builder()
+				.token(jwtToken)
+				.build();
+	}
 
-	
+	@Override
+	public AuthenticationResponse authenticate(AuthenticationRequest request) {
+		authManger.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+		var user = repository.findByEmail(request.getEmail())
+				.orElseThrow();
+		var jwtToken = jwtUtils.generateToken(user);
+		return AuthenticationResponse.builder()
+				.token(jwtToken)
+				.build();
+
+	}
+
+	private Role findOrCreateRole(String roleName) {
+		Role role = roleRepository.findByName(roleName)
+				.orElse(null);
+		if (role == null) {
+			return roleRepository.save(
+					Role.builder()
+							.name(roleName)
+							.build()
+			);
+		}
+		return role;
+	}
+
+
 }
